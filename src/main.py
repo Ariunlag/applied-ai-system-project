@@ -12,16 +12,36 @@ You will implement the functions in recommender.py:
 from .recommender import load_songs, recommend_songs
 
 
+USER_PROFILES = {
+    "High-Energy Pop": {
+        "genre": "pop",
+        "mood": "happy",
+        "energy": 0.9,
+        "likes_acoustic": False,
+    },
+    "Chill Lofi": {
+        "genre": "lofi",
+        "mood": "chill",
+        "energy": 0.35,
+        "likes_acoustic": True,
+    },
+    "Deep Intense Rock": {
+        "genre": "rock",
+        "mood": "intense",
+        "energy": 0.95,
+        "likes_acoustic": False,
+    },
+}
+
+
 def main() -> None:
     songs = load_songs("data/songs.csv")
     print(f"Loaded {len(songs)} songs\n")
 
-    # Starter example profile
-    user_prefs = {"genre": "pop", 
-                  "mood": "happy", 
-                  "energy": 0.8,
-                  "likes_acoustic": False
-                  }
+    # Pick one of the named taste profiles above.
+    selected_profile = "Deep Intense Rock"
+    user_prefs = USER_PROFILES[selected_profile]
+    print(f"Using profile: {selected_profile}")
 
     recommendations = recommend_songs(user_prefs, songs, k=5)
 

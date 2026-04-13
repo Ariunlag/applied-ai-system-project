@@ -42,6 +42,26 @@ flowchart TD
 
 This system might over-prioritize genre and miss good songs that match the user's mood and energy but use a different genre label.
 
+### User Profile Screenshots
+
+These screenshots show recommendation outputs for different profile purposes.
+
+#### Initial Recommendation
+
+![Initial Recommendation](initial-recommendation.png)
+
+#### High-Energy Pop Profile
+
+![High-Energy Pop](high-energy-pop.png)
+
+#### Deep Intense Rock Profile
+
+![Deep Intense Rock](deep-intense-rock.png)
+
+#### Chili Pop Profile
+
+![Chili Pop](chili-pop.png)
+
 ---
 
 ## Getting Started
