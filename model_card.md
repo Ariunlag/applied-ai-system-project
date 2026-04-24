@@ -22,6 +22,12 @@ Each song has features like genre, mood, energy, tempo, valence, danceability, a
 
 For each song, the model calculates a weighted score. It gives points when genre matches, mood matches, energy is close to the target, and acousticness aligns with the user's preference.
 
+The updated system now uses a multi-step process:
+1. Planner stage normalizes user inputs and adapts weights for edge cases.
+2. Scoring stage ranks candidates.
+3. Self-check stage revises weak top-ranked items.
+4. Reliability evaluator reports consistency and guardrail alerts.
+
 The final score uses this weighting:
 - genre match: 0.35
 - mood match: 0.25
@@ -30,7 +36,7 @@ The final score uses this weighting:
 
 After scoring all songs, it sorts by score and returns the top results with plain-language reasons.
 
-Compared to the starter logic, I implemented real scoring, reason generation, numeric data parsing from CSV, and a working CLI-first recommendation flow.
+Compared to the starter logic, I implemented real scoring, reason generation, numeric data parsing from CSV, a planner plus self-check workflow, and a working CLI-first recommendation flow.
 
 ---
 
@@ -82,6 +88,13 @@ Profiles tested include:
 - Additional edge-case/adversarial profiles (missing values, unknown labels, extreme energy values)
 
 I checked whether the top-ranked songs matched the expected vibe and whether the explanation reasons were consistent with the scoring weights.
+
+I also ran `python -m src.evaluate` as a reliability harness to test:
+- normal profile behavior
+- unknown labels
+- invalid energy values outside [0, 1]
+
+The evaluator reports planner warnings, self-check flags, and guardrail alerts to show how the system reacts under noisy inputs.
 
 I also compared behavior after discussing experiments like increasing energy weight and reducing genre weight, and removing mood checks, to see whether recommendations became more accurate or just different.
 
