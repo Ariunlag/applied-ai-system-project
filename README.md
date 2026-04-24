@@ -240,9 +240,9 @@ I used AI assistance to iterate on system design, edge-case handling, and test e
 
 Future improvements include richer user profiles, diversity-aware ranking, and a stronger evaluator with human-labeled preference sets.
 
-## Video Walkthrough Notes
+## Video 
 
-Use [demo_walkthrough.md](demo_walkthrough.md) as the 5-7 minute speaking script for your demo video.
+
 
 ## Model Card
 
