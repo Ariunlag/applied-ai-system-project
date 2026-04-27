@@ -2,17 +2,17 @@
 
 ## 1. Model Name
 
-**VibeMatch CLI 1.0**
+**VibeMatch Reliability Loop 2.0**
 
 ---
 
 ## 2. Intended Use
 
-This recommender suggests top songs from a small catalog based on a user's taste profile. It generates simple, explainable recommendations for classroom learning.
+This recommender suggests top songs from a catalog based on a user's taste profile. It generates simple, explainable recommendations for classroom learning and reliability analysis.
 
 It assumes the user can describe their taste with a few preferences: favorite genre, favorite mood, target energy, and whether they like acoustic songs.
 
-This is for classroom exploration, not for production use with real users.
+This is for classroom exploration and demo use (CLI and Streamlit), not for production use with real users. The Streamlit demo includes both preset profiles and a Custom mode so users can choose catalog-based genres and moods instead of being limited to fixed examples.
 
 ---
 
@@ -42,11 +42,11 @@ Compared to the starter logic, I implemented real scoring, reason generation, nu
 
 ## 4. Data
 
-The catalog has **24 songs** from `data/songs.csv`.
+The catalog has **124 songs** from `data/songs.csv`.
 
-The data includes a mix of genres (for example pop, lofi, rock, house, jazz, ambient, folk) and moods (for example happy, chill, intense, romantic, focused, dreamy).
+The data includes a mix of genres (for example pop, lofi, rock, house, jazz, ambient, folk, electronic, indie pop, soul) and moods (for example happy, chill, intense, romantic, focused, dreamy, warm, confident, reflective).
 
-I did not add or remove songs in this version.
+Compared with the original baseline catalog, this version includes 100 additional entries to improve ranking variety in demos and stress tests.
 
 Missing parts of musical taste include lyrics, language, artist history, listening context, and user behavior data (skips, likes, repeats).
 
@@ -61,7 +61,7 @@ The model works well when user preferences are clear, such as:
 
 It captures intuitive patterns like high-energy profiles getting stronger, faster tracks and chill profiles getting lower-energy, often more acoustic songs.
 
-In my runs, recommendations for "High-Energy Pop" felt reasonable because songs with pop/happy labels and close energy targets ranked higher.
+The reliability loop also improves observability by reporting consistency, planner warnings, self-check flags, and guardrail alerts alongside recommendations.
 
 ---
 
@@ -69,17 +69,19 @@ In my runs, recommendations for "High-Energy Pop" felt reasonable because songs 
 
 This system is simple and can over-prioritize one feature, especially genre, if the weights are not balanced.
 
-Because the catalog is small, the same songs may appear often across different profiles. That can create a filter-bubble feeling even when the logic is working correctly.
+Although the catalog is larger than the baseline, many records are still synthetic and may not represent real listening behavior diversity.
 
-Some genres and moods are underrepresented (many appear only once), so users with less common tastes may get weaker matches.
+Some genres and moods remain underrepresented, so users with less common tastes may get weaker matches.
 
 The model may also ignore good cross-genre songs that match mood and energy because exact genre matching still has the highest weight.
+
+The consistency metric is a heuristic and not a ground-truth accuracy score.
 
 ---
 
 ## 7. Evaluation
 
-I evaluated the system by running `python -m src.main` with multiple profile dictionaries and comparing the top results to my musical intuition.
+I evaluated the system by running `python -m src.main`, `python -m src.evaluate`, and `python -m pytest -q`.
 
 Profiles tested include:
 - High-Energy Pop
@@ -89,12 +91,17 @@ Profiles tested include:
 
 I checked whether the top-ranked songs matched the expected vibe and whether the explanation reasons were consistent with the scoring weights.
 
-I also ran `python -m src.evaluate` as a reliability harness to test:
+I ran `python -m src.evaluate` as a reliability harness to test:
 - normal profile behavior
 - unknown labels
 - invalid energy values outside [0, 1]
 
-The evaluator reports planner warnings, self-check flags, and guardrail alerts to show how the system reacts under noisy inputs.
+Recent reliability harness outputs (with 124-song catalog):
+- baseline_pop: consistency 0.667, no alerts
+- unknown_labels: consistency 0.0, guardrail alert triggered
+- invalid_energy: consistency 0.667, planner warning for clipped energy
+
+Automated tests: `5 passed` in `tests/test_recommender.py`.
 
 I also compared behavior after discussing experiments like increasing energy weight and reducing genre weight, and removing mood checks, to see whether recommendations became more accurate or just different.
 
@@ -108,13 +115,15 @@ Next improvements I would make:
 - Add fallback matching for unknown genre/mood values.
 - Use valence, tempo, and danceability more actively as secondary tie-breakers.
 - Improve explanations by showing each feature's score contribution.
+- Replace synthetic catalog expansion with curated real-world metadata.
+- Add human-labeled preference sets to evaluate recommendation quality beyond heuristics.
 
 ---
 
 ## 9. Personal Reflection
 
-I learned that recommender systems can seem smart with simple rules, but the quality depends heavily on feature design and data coverage.
+I learned that recommender systems can seem smart with simple rules, but quality depends heavily on feature design, data coverage, and evaluation loops.
 
-A surprising result was how often one song can dominate rankings when one feature weight is too strong or the catalog is small.
+A surprising result was that top recommendations could still look plausible even when reliability consistency was low, which reinforced the need for explicit guardrail and evaluation output.
 
-This project changed how I think about music apps: recommendations are not only about matching taste, but also about balancing relevance, fairness, and variety.
+This project changed how I think about music apps: recommendations are not only about matching taste, but also about balancing relevance, fairness, variety, and trustworthy evaluation.

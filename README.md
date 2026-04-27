@@ -117,7 +117,7 @@ Run the interactive demo UI with:
 python -m streamlit run streamlit_app.py
 ```
 
-The UI lets you switch between 2-3 example inputs, run the full system end to end, and inspect the recommendation table plus reliability alerts in one place.
+The UI lets you choose a built-in demo profile or switch to Custom mode, where genre and mood are selected from catalog values and the energy/acoustic settings can be adjusted freely. You can run the full system end to end and inspect the recommendation table plus reliability alerts in one place.
 
 ## Tests
 
@@ -206,7 +206,7 @@ Guardrail alerts: []
 
 ## Limitations
 
-1. Catalog is small and fixed.
+1. Catalog quality is still limited by synthetic entries and no real user behavior logs.
 2. The model does not use listening history, lyrics, or context.
 3. Consistency metric is simple profile alignment, not human preference ground truth.
 
@@ -230,7 +230,7 @@ What I learned:
 
 This project taught me that AI problem-solving is not only about prediction quality, but also about control loops: validate input, generate output, then evaluate and revise. Building the planner and evaluator made it clear that reliability is a design choice, not a side effect.
 
-The main limitations are that the system uses a small fixed catalog, does not understand lyrics or listening history, and can still over-reward genre matching. Those same limits can introduce bias toward the categories that appear most often in the data.
+The main limitations are that the system still relies on synthetic catalog entries, does not understand lyrics or listening history, and can still over-reward genre matching. Those same limits can introduce bias toward the categories that appear most often in the data.
 
 The AI could be misused if someone treated it like a real music taste authority or used it to make unfair assumptions about users. To reduce that risk, I kept the system clearly framed as a classroom simulation, added guardrails for invalid inputs, and included reliability output so weak cases are visible instead of hidden.
 
@@ -240,11 +240,45 @@ I used AI assistance to iterate on system design, edge-case handling, and test e
 
 Future improvements include richer user profiles, diversity-aware ranking, and a stronger evaluator with human-labeled preference sets.
 
-## Video 
+## Walkthrough (Screenshots)
+
+This section documents the Streamlit demo running end-to-end with both built-in profiles and a Custom profile mode. The app is launched with `python -m streamlit run streamlit_app.py`, then each profile is submitted to the same reliability-aware recommendation pipeline.
+
+### 1) Initial System Screen
+
+![Initial Streamlit Recommender Screen](assets/initial-recommendation.png)
+
+The initial screen shows the user-controlled inputs: genre, mood, energy, and acoustic preference. After submission, the system executes planner -> scorer -> self-check -> reliability evaluator and returns ranked songs with explanation text and reliability signals.
+
+### 2) Example Input A: High-Energy Pop
+
+![High-Energy Pop Output](assets/high-energy-pop.png)
+
+Input profile: `genre=pop, mood=happy, energy=0.9, likes_acoustic=False`.
+
+The model returns songs that match a high-energy pop vibe. Explanations explicitly reference genre match, mood match, and energy closeness. Reliability output remains stable for this profile, with no major guardrail concerns.
+
+### 3) Example Input B: Chill Lofi
+
+![Chill Lofi Output](assets/chili-pop.png)
+
+Input profile: `genre=lofi, mood=chill, energy=0.2, likes_acoustic=True`.
+
+Recommendations shift to calmer, lower-energy, and more acoustic tracks. The explanation strings confirm that mood and acoustic preference strongly influenced ranking. The reliability panel shows how consistency behaves for a contrasting low-energy profile.
+
+### 4) Example Input C: Deep Intense Rock
+
+![Deep Intense Rock Output](assets/deep-intense-rock.png)
+
+Input profile: `genre=rock, mood=intense, energy=0.95, likes_acoustic=False`.
+
+Results prioritize intense high-energy rock candidates. Explanations indicate strong alignment on genre, mood, and energy. Reliability signals provide visibility into whether ranking quality remains consistent under a different preference pattern.
 
 
+In the report, explain that this screenshot demonstrates the system's guardrail behavior when the input is outside the valid range.
+
+The Streamlit app also supports Custom mode, which lets the user choose any available genre and mood from the catalog instead of only using the preset profiles.
 
 ## Model Card
-
 See `model_card.md`.
 

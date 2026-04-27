@@ -32,18 +32,33 @@ DEMO_PROFILES = {
 }
 
 
+def _catalog_options(catalog, key: str):
+    return sorted({str(song[key]).strip().lower() for song in catalog if str(song.get(key, "")).strip()})
+
+
 @st.cache_data
 def get_catalog():
     return load_songs("data/songs.csv")
 
 
-def profile_inputs(profile_name: str):
-    default = DEMO_PROFILES[profile_name]
+def profile_inputs(profile_name: str, catalog):
     st.sidebar.subheader("Demo Profile")
-    genre = st.sidebar.text_input("Genre", value=default["genre"])
-    mood = st.sidebar.text_input("Mood", value=default["mood"])
-    energy = st.sidebar.slider("Target energy", min_value=0.0, max_value=2.0, value=float(default["energy"]), step=0.01)
-    likes_acoustic = st.sidebar.checkbox("Likes acoustic songs", value=bool(default["likes_acoustic"]))
+
+    genre_choices = _catalog_options(catalog, "genre")
+    mood_choices = _catalog_options(catalog, "mood")
+
+    if profile_name == "Custom":
+        genre = st.sidebar.selectbox("Genre", genre_choices, index=0 if genre_choices else None)
+        mood = st.sidebar.selectbox("Mood", mood_choices, index=0 if mood_choices else None)
+        energy = st.sidebar.slider("Target energy", min_value=0.0, max_value=1.0, value=0.5, step=0.01)
+        likes_acoustic = st.sidebar.selectbox("Acoustic preference", ["Unknown", "Yes", "No"], index=0)
+        likes_acoustic = {"Yes": True, "No": False}.get(likes_acoustic, None)
+    else:
+        default = DEMO_PROFILES[profile_name]
+        genre = st.sidebar.selectbox("Genre", [default["genre"]] + [g for g in genre_choices if g != default["genre"]])
+        mood = st.sidebar.selectbox("Mood", [default["mood"]] + [m for m in mood_choices if m != default["mood"]])
+        energy = st.sidebar.slider("Target energy", min_value=0.0, max_value=2.0, value=float(default["energy"]), step=0.01)
+        likes_acoustic = st.sidebar.checkbox("Likes acoustic songs", value=bool(default["likes_acoustic"]))
     return {
         "genre": genre,
         "mood": mood,
@@ -81,8 +96,8 @@ st.markdown(
 )
 
 catalog = get_catalog()
-profile_name = st.sidebar.selectbox("Choose a demo profile", list(DEMO_PROFILES.keys()))
-user_prefs = profile_inputs(profile_name)
+profile_name = st.sidebar.selectbox("Choose a demo profile", ["Custom"] + list(DEMO_PROFILES.keys()))
+user_prefs = profile_inputs(profile_name, catalog)
 run_button = st.sidebar.button("Run recommendation")
 
 col1, col2 = st.columns([1.2, 1])
@@ -129,7 +144,7 @@ else:
     st.info("Choose a profile and click Run recommendation to see the end-to-end system.")
     st.subheader("Example Profiles")
     st.write(
-        "Use these to record your video walkthrough: High-Energy Pop, Chill Lofi, Deep Intense Rock, and the Reliability Stress Case."
+        "Use the built-in profiles for your video walkthrough, or choose Custom to test any genre and mood available in the catalog."
     )
     preview = []
     for name, profile in DEMO_PROFILES.items():
